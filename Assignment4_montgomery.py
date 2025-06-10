@@ -47,18 +47,7 @@ def modInverse(A, M):
     return res
 
 def montgomery(a,b,r,r_bar,n_bar,power):
-    t=a*b
-    print(t)
-    td=t*n_bar
-    print(td)
-    m=(t*n_bar)%r
-    inter_n=m*n
-    k=t+(m*n)
-    u=int((t+(m*n)) >> power)
-    if(u>n):
-        return (u-n)
-    else:
-        return u
+   #write your code here
 
 r,power=find_r(n)
 a_bar=find_a_bar(a,power)
