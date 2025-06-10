@@ -47,98 +47,8 @@ reg [4:0] count;
 
 
 wire done;
-//assign out={36'd0,final_result[752:0]};
 
-
-
-
-
-
-
-always@(posedge clk)
-begin
-if(rst)
-count<=0;
-else if(count==4'd6)
-count<=count;
-else
-count<=count+1;
-end
-
-
-
-
-
-assign done=(count==4'd5)?1:0;
-assign sum_3_en=(count<4'd4)?1:0;
-assign sum_4_en=(count<4'd5)?1:0;
-
-
-always@(posedge clk)
-begin
-if(rst)
-begin
-reg_a<=a;reg_b<=b;
-cin_3<=1'd0;
-end
-else
-begin
-reg_a<={64'd0,reg_a[255:64]};reg_b<={64'd0,reg_b[255:64]};
-cin_3<=cout_3;
-end
-end
-
-
-always@(posedge clk)
-begin
-if(rst)
-begin
-reg_sum_3<=0;
-end
-else if(sum_3_en)
-begin
-reg_sum_3<={sum_3,reg_sum_3[255:64]};
-end
-else
-reg_sum_3<=reg_sum_3;
-end
-
-always@(posedge clk)
-begin
-if(rst)
-begin
-reg_sum_4<=0;
-end
-else if(sum_4_en)
-begin
-reg_sum_4<={sum_4,reg_sum_4[255:64]};
-end
-else
-reg_sum_4<=reg_sum_4;
-end
-
-always@(posedge clk)
-begin
-rst_r<=rst;
-rst_rr<=rst_r;
-end
-
-always@(posedge clk)
-begin
-if(rst|rst_r)
-begin
-reg_p<=prime;
-cin_4<=1'd0;
-end
-else 
-begin
-reg_p<={64'h0,reg_p[255:64]};
-cin_4<=cout_4;
-end
-end
-
-
-
+//write your code here
 
 
 
@@ -147,20 +57,7 @@ adder_189 #(.W(64)) add2(reg_a[63:0],reg_b[63:0],cin_3,sum_3,cout_3);
 
 subtractor_256_bit_old #(.W(64)) sub(reg_sum_3[255:192],reg_p[63:0],cin_4,sum_4,cout_4);
 
-/*always@(*)
-begin
-if(sel==0)
-sign<=reg_sum_4[767];
-else
-sign<=reg_sum_3[767];
-end*/
 
-assign sign=cout_4;
-
-assign add_out=reg_sum_3[255:0];
-assign sub_out=reg_sum_4[255:0];
-
-assign out=(sign)?add_out:sub_out;
 
 endmodule
 
