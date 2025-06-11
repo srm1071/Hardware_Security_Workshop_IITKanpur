@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -6,7 +5,10 @@ import math
 from scipy.stats import pearsonr
 from google.colab import drive
 drive.mount('/content/drive')
+# Download the data from this link
+# Link= https://drive.google.com/file/d/1OlR5_68xsMlKq460bzgO2fTzLz56sjt1/view?usp=sharing
 df = pd.read_csv('/content/drive/MyDrive/Thapar CPA AES Attack/aes_data_500k.csv', sep=',',index_col=None, header=None)
+
 # We have 500k traces but we will only use 10k traces
 # First and second columns of the traces have plaintexts and ciphertexts respectively
 # There are total 282 columns
@@ -80,40 +82,39 @@ def inv_shift_row(s):
 import numpy as np
 
 def custom_corrcoef(x, y):
-    """
-    Computes the Pearson correlation coefficient matrix between two 1D arrays.
-
-    Args:
-        x (np.ndarray): 1D array
-        y (np.ndarray): 1D array
-
-    Returns:
-        np.ndarray: 2x2 correlation coefficient matrix
-    """
     x = np.asarray(x)
     y = np.asarray(y)
 
-    #Write your code here
+    if x.ndim != 1 or y.ndim != 1:
+        raise ValueError("Inputs must be 1D arrays.")
 
+    if len(x) != len(y):
+        raise ValueError("Arrays must have the same length.")
+
+    x_mean = x - np.mean(x)
+    y_mean = y - np.mean(y)
+
+    cov = np.sum(x_mean * y_mean) / (len(x) - 1)
+
+    std_x = np.sqrt(np.sum(x_mean ** 2) / (len(x) - 1))
+    std_y = np.sqrt(np.sum(y_mean ** 2) / (len(y) - 1))
+
+    corr = cov / (std_x * std_y)
+
+    return np.array([[1.0, corr], [corr, 1.0]])
 
 def p_correlation(key_byte, byte_index, traces, plaintexts, ciphertexts):
 
     power_model = []
 
     for i, ciphertext in enumerate(ciphertexts):
-        ind = inv_Shift_row_lut[byte_index]
-        # cip_byte = int(ciphertext[2*ind : 2*(ind+1)], 16)
-        addkey_outp = int(ciphertext[2*byte_index : 2*(byte_index+1)], 16) ^ key_byte
-        sbox_outp = reverse_lookup(addkey_outp)
-        power_model.append((sbox_outp^int(ciphertext[2*ind : 2*(ind+1)], 16)).bit_count())
+        #Write Your Code Here
 
     correlations = []
     for i in range(len(traces)):
         measurements = traces[i]
         x = [power_model, measurements]
         coefficient = custom_corrcoef(np.array(power_model), np.array(measurements))
-        # coefficient = np.corrcoef(np.array(power_model), np.array(measurements))
-        # coefficient = pearsonr(power_model, measurements)
         correlations.append(abs(coefficient[0][1]))
 
     return max(correlations), correlations
@@ -145,10 +146,8 @@ def plot_corr(corr_mat, retrieved_key, p_title, correct_byte):
             plt.plot(corr_mat[plot][i], color=col)
         plt.plot(corr_mat[plot][retrieved_key[plot]], color = 'orange')
         plt.plot(corr_mat[plot][int(correct_byte[2*plot : 2*(plot+1)], 16)], color = 'green')
-        # plt.plot(corr_mat[plot][int(fake_byte[2*plot : 2*(plot+1)], 16)], color = 'red')
 
     plt.savefig(p_title + ".png")
-    # plt.close()
 final_corr_mat = []
 for n in range(10000,10001,1):
     retrieved_key = []
@@ -156,7 +155,6 @@ for n in range(10000,10001,1):
     corr_mat = []
     sample_traces = [j[:n] for j in traces]
     for i in range(16):
-        # print("The byte no: ", i)
         (best_key, max_p, p_list) = get_correct_key_byte(i, sample_traces, plaintexts[:n], ciphertexts[:n])
         retrieved_key.append(best_key)
         corr_mat.append(p_list)
@@ -171,8 +169,5 @@ for n in range(10000,10001,1):
     plot_corr(corr_mat, retrieved_key, "aes_bram2_100000", "d014f9a8c9ee2589e13f0cc8b6630ca6")
 
     final_corr_mat.append(corr_mat)
-
-    # if subkey == "d014f9a8c9ee2589e13f0cc8b6630ca6":
-    #     break
 
     print('')
