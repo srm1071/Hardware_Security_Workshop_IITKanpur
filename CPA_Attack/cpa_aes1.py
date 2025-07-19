@@ -108,7 +108,11 @@ def p_correlation(key_byte, byte_index, traces, plaintexts, ciphertexts):
     power_model = []
 
     for i, ciphertext in enumerate(ciphertexts):
-        #Write Your Code Here
+        ind = inv_Shift_row_lut[byte_index]
+        # cip_byte = int(ciphertext[2*ind : 2*(ind+1)], 16)
+        addkey_outp = int(ciphertext[2*byte_index : 2*(byte_index+1)], 16) ^ key_byte
+        sbox_outp = reverse_lookup(addkey_outp)
+        power_model.append((sbox_outp^int(ciphertext[2*ind : 2*(ind+1)], 16)).bit_count())
 
     correlations = []
     for i in range(len(traces)):
